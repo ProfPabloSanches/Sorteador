@@ -40,12 +40,18 @@
         .free-option span { font-size: 11px; font-weight: bold; color: #e74c3c; }
 
         /* Linha de Botões */
-        .button-row { display: flex; justify-content: center; gap: 15px; }
-        .btn { padding: 14px 40px; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .button-row { display: flex; justify-content: center; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .btn { padding: 14px 40px; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; text-decoration: none; display: inline-block; }
+        
         .shuffle-btn { background: #2980b9; }
         .shuffle-btn:hover { background: #1f6391; }
+        
         .print-btn { background: #27ae60; }
         .print-btn:hover { background: #219150; }
+
+        /* Botão Voltar para Sorteador */
+        .sorteador-btn { background: transparent; color: #2980b9; border: 2px solid #2980b9; padding: 12px 30px; font-size: 14px; }
+        .sorteador-btn:hover { background: #2980b9; color: white; }
 
         /* Estilo das Cartelas (Impressão) */
         .page { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 20px; width: 210mm; margin: 0 auto 40px auto; padding: 10mm; background: white; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.1); page-break-after: always; }
@@ -113,6 +119,8 @@
         </div>
 
         <div class="button-row">
+            <a href="index.html" class="btn sorteador-btn">🎮 Abrir Sorteador</a>
+            
             <button class="btn shuffle-btn" onclick="gerarCartelas()">🔄 Gerar Cartelas</button>
             <button class="btn print-btn" onclick="window.print()">🖨️ Imprimir Tudo</button>
         </div>

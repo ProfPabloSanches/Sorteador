@@ -42,7 +42,10 @@
         
         .shuffle-btn { background: #2980b9; }
         .print-btn { background: #27ae60; }
+        
+        /* Botão Sorteador apontando para index.html */
         .sorteador-btn { background: transparent; color: #2980b9; border: 2px solid #2980b9; padding: 12px 25px; font-size: 14px; }
+        .sorteador-btn:hover { background: #2980b9; color: white; }
 
         /* Estilos de Página e Grid de Impressão */
         .page { 
@@ -56,24 +59,9 @@
         }
 
         /* Configurações Dinâmicas por Layout */
-        /* 2 CARTELAS: PAISAGEM */
-        .layout-2 { 
-            width: 297mm; height: 210mm; 
-            grid-template-columns: 1fr 1fr; 
-            padding: 10mm; gap: 10mm; 
-        }
-        /* 4 CARTELAS: RETRATO */
-        .layout-4 { 
-            width: 210mm; height: 297mm; 
-            grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
-            padding: 10mm; gap: 10mm; 
-        }
-        /* 6 CARTELAS: RETRATO (Ajustado para não cortar) */
-        .layout-6 { 
-            width: 210mm; height: 297mm; 
-            grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); 
-            padding: 8mm; gap: 5mm; 
-        }
+        .layout-2 { width: 297mm; height: 210mm; grid-template-columns: 1fr 1fr; padding: 10mm; gap: 10mm; }
+        .layout-4 { width: 210mm; height: 297mm; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; padding: 10mm; gap: 10mm; }
+        .layout-6 { width: 210mm; height: 297mm; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); padding: 8mm; gap: 5mm; }
 
         .card { border: 2px solid #000; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: fixed; }
@@ -82,7 +70,6 @@
 
         .free-cell { background-color: #f5f5f5; color: #e74c3c; font-size: 0.9em !important; }
 
-        /* Ajustes de fonte baseados na grade */
         .grid-3 td { font-size: 2em; padding: 15px 2px; }
         .grid-4 td { font-size: 1.5em; padding: 10px 2px; }
         .grid-5 td { font-size: 1.1em; padding: 6px 2px; }
@@ -91,16 +78,12 @@
             .setup-container, h1 { display: none; }
             body { background: white; padding: 0; margin: 0; }
             .page { box-shadow: none; margin: 0; border: none; }
-            
-            /* Força paisagem se o layout for de 2 cartelas */
             .layout-2 { width: 100vw; height: 100vh; }
             @page { margin: 0; }
-            .is-landscape { size: landscape; }
-            .is-portrait { size: portrait; }
         }
     </style>
 </head>
-<body id="body-main">
+<body>
 
     <h1>Gerador de Bingo de Potenciação</h1>
     
@@ -146,7 +129,7 @@
         </div>
 
         <div class="button-row">
-            <a href="index.html" class="btn sorteador-btn">🎮 Sorteador</a>
+            <a href="index.html" class="btn sorteador-btn">🎮 Voltar ao Sorteador</a>
             
             <div class="input-group">
                 <label>Cartelas por Página</label>
@@ -186,7 +169,6 @@
             const useFree = document.getElementById('useFree').checked;
             const perPage = parseInt(document.getElementById('layoutSorteio').value);
             
-            // Adiciona classe de orientação para o CSS @media print
             const styleTag = document.getElementById('print-orientation') || document.createElement('style');
             styleTag.id = 'print-orientation';
             styleTag.innerHTML = `@media print { @page { size: ${perPage == 2 ? 'landscape' : 'portrait'}; } }`;

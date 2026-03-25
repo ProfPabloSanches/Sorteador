@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sorteador Bingo - Potenciação Interativa</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; height: 100vh; margin: 0; background: #121212; color: white; overflow: hidden; }
+        
+        /* Área Principal */
+        .main { flex: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #444; padding: 20px; }
+        h1 { color: #f1c40f; letter-spacing: 2px; margin-bottom: 5px; }
+        .sub { color: #888; margin-bottom: 30px; }
+        
+        /* EXPOENTE ELEVADO E FONTE AJUSTADA */
+        sup { 
+            vertical-align: super; 
+            font-size: 0.5em !important; 
+            line-height: 0; 
+            position: relative; 
+            top: -0.5em; 
+        }
+
+        .display-operacao { font-size: 140px; font-weight: bold; margin: 40px; color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.2); height: 180px; display: flex; align-items: center; }
+        
+        /* Lateral de Histórico */
+        .sidebar { flex: 1; padding: 20px; overflow-y: auto; background: #1e1e1e; }
+        .sidebar h2 { font-size: 18px; border-bottom: 2px solid #444; padding-bottom: 10px; color: #bbb; text-align: center; }
+        .historico-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        
+        .historico-item { 
+            background: #2d2d2d; padding: 15px 10px; border-radius: 4px; 
+            text-align: center; font-size: 24px; color: #f1c40f; border: 1px solid #444;
+            cursor: pointer; transition: 0.2s;
+            animation: fadeIn 0.3s ease;
+        }
+        .historico-item:hover { background: #3d3d3d; transform: scale(1.05); border-color: #f1c40f; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Botões */
+        .controls { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        button { padding: 20px 60px; font-size: 24px; cursor: pointer; background: #f1c40f; color: #000; border: none; border-radius: 50px; font-weight: bold; transition: 0.2s; box-shadow: 0 4px #d4ac0d; }
+        button:hover { background: #d4ac0d; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px #d4ac0d; }
+        button:disabled { background: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+        
+        .secondary-btn { background: transparent; font-size: 14px; padding: 8px 15px; border-radius: 4px; margin-top: 5px; box-shadow: none; font-weight: normal; transition: 0.3s; cursor: pointer; }
+        .reset { color: #e74c3c; border: 1px solid #e74c3c; margin-top: 20px; }
+        .reset:hover { background: #e74c3c; color: white; }
+        .instr-btn { color: #3498db; border: 1px solid #3498db; }
+        .instr-btn:hover { background: #3498db; color: white; }
+
+        /* Modais */
+        .modal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(5px);
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content { 
+            background: #2c3e50; padding: 40px; border-radius: 20px; border: 3px solid #f1c40f;
+            text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.5); max-width: 600px;
+        }
+        .modal-op { font-size: 100px; color: #bdc3c7; font-weight: bold; }
+        .modal-res { font-size: 140px; color: #f1c40f; font-weight: bold; text-shadow: 0 0 30px rgba(241,196,15,0.4); }
+        
+        .instr-text { text-align: left; line-height: 1.6; color: #ecf0f1; font-size: 18px; margin: 20px 0; }
+        .close-modal { margin-top: 20px; background: #95a5a6; font-size: 16px; padding: 10px 20px; color: white; border-radius: 5px; border: none; }
+    </style>
+</head>
+<body>
+
+    <div class="main">
+        <h1>BINGO: POTÊNCIAS</h1>
+        <p class="sub">Bases e Expoentes de 1 a 6</p>
+        <div id="operacao-atual" class="display-operacao">?</div>
+        
+        <div class="controls">
+            <button id="btn-sortear" onclick="sortear()">PRÓXIMA OPERAÇÃO</button>
+            <button class="secondary-btn instr-btn" onclick="abrirInstrucoes()">Instruções</button>
+            <button class="secondary-btn reset" onclick="zerarSorteador()">Zerar Jogo</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>HISTÓRICO (Clique p/ ver)</h2>
+        <div id="historico" class="historico-grid"></div>
+    </div>
+
+    <div id="modal-res-container" class="modal-overlay" onclick="fecharModal('modal-res-container')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="modal-op" class="modal-op"></div>
+            <div style="color: #95a5a6; font-size: 20px; margin: 10px 0;">resultado:</div>
+            <div id="modal-res" class="modal-res"></div>
+            <button class="close-modal" onclick="fecharModal('modal-res-container')">Fechar [X]</button>
+        </div>
+    </div>
+
+    <div id="modal-instr" class="modal-overlay" onclick="fecharModal('modal-instr')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="color: #f1c40f;">Instruções do Jogo</h2>
+            <div class="instr-text">
+                1. Distribua as cartelas para os alunos.<br>
+                2. Clique em "PRÓXIMA OPERAÇÃO" para sortear uma potência.<br>
+                3. Os alunos devem calcular mentalmente ou no papel o resultado.<br>
+                4. Se o resultado estiver na cartela, o aluno marca o número.<br>
+                5. Para conferir um resultado, clique na operação desejada no Histórico lateral.<br>
+                6. Ganha quem completar a cartela primeiro e gritar BINGO!
+            </div>
+            <button class="close-modal" onclick="fecharModal('modal-instr')">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        let operacoesPool = [];
+
+        function inicializar() {
+            operacoesPool = [];
+            // Gera potências de 1^1 a 6^6 (conforme o padrão das cartelas)
+            for (let b = 1; b <= 6; b++) {
+                for (let e = 1; e <= 6; e++) {
+                    operacoesPool.push({
+                        html: b + '<sup>' + e + '</sup>',
+                        resultado: Math.pow(b, e).toLocaleString('pt-BR')
+                    });
+                }
+            }
+            embaralhar();
+        }
+
+        function embaralhar() {
+            operacoesPool.sort(() => Math.random() - 0.5);
+        }
+
+        function sortear() {
+            if (operacoesPool.length === 0) {
+                document.getElementById('operacao-atual').style.fontSize = '60px';
+                document.getElementById('operacao-atual').innerText = "FIM DO JOGO";
+                document.getElementById('btn-sortear').disabled = true;
+                return;
+            }
+            const itemSorteado = operacoesPool.pop();
+            document.getElementById('operacao-atual').innerHTML = itemSorteado.html;
+
+            const historicoDiv = document.getElementById('historico');
+            const novoItem = document.createElement('div');
+            novoItem.className = 'historico-item';
+            novoItem.innerHTML = itemSorteado.html;
+            
+            // Ao clicar no item do histórico, abre o quadro de resultado
+            novoItem.onclick = () => mostrarResultado(itemSorteado.html, itemSorteado.resultado);
+            
+            historicoDiv.prepend(novoItem);
+        }
+
+        function mostrarResultado(opHtml, resText) {
+            document.getElementById('modal-op').innerHTML = opHtml;
+            document.getElementById('modal-res').innerText = resText;
+            document.getElementById('modal-res-container').classList.add('show');
+        }
+
+        function abrirInstrucoes() {
+            document.getElementById('modal-instr').classList.add('show');
+        }
+
+        function fecharModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function zerarSorteador() {
+            if (confirm("Deseja reiniciar o sorteio? O histórico será apagado.")) {
+                fecharModal('modal-res-container');
+                document.getElementById('historico').innerHTML = "";
+                document.getElementById('operacao-atual').innerHTML = "?";
+                document.getElementById('operacao-atual').style.fontSize = '140px';
+                document.getElementById('btn-sortear').disabled = false;
+                inicializar();
+            }
+        }
+
+        inicializar();
+    </script>
+</body>
+</html>

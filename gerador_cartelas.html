@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Bingo de Potenciação - Gerador Pro</title>
+    <title>Bingo de Potenciação - Gerador com Hash de Grupo</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
         h1 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
@@ -42,12 +42,9 @@
         
         .shuffle-btn { background: #2980b9; }
         .print-btn { background: #27ae60; }
-        
-        /* Botão Sorteador apontando para index.html */
         .sorteador-btn { background: transparent; color: #2980b9; border: 2px solid #2980b9; padding: 12px 25px; font-size: 14px; }
-        .sorteador-btn:hover { background: #2980b9; color: white; }
 
-        /* Estilos de Página e Grid de Impressão */
+        /* Estilos de Página e Impressão */
         .page { 
             display: grid; 
             margin: 0 auto 40px auto; 
@@ -58,34 +55,44 @@
             overflow: hidden;
         }
 
-        /* Configurações Dinâmicas por Layout */
         .layout-2 { width: 297mm; height: 210mm; grid-template-columns: 1fr 1fr; padding: 10mm; gap: 10mm; }
         .layout-4 { width: 210mm; height: 297mm; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; padding: 10mm; gap: 10mm; }
         .layout-6 { width: 210mm; height: 297mm; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); padding: 8mm; gap: 5mm; }
 
-        .card { border: 2px solid #000; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box; }
+        .card { border: 2px solid #000; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box; position: relative; }
         table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: fixed; }
         td { border: 1.5px solid #333; font-weight: bold; color: #000; padding: 8px 2px; }
         h4 { margin: 0 0 5px 0; color: #333; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #ddd; }
 
-        .free-cell { background-color: #f5f5f5; color: #e74c3c; font-size: 0.9em !important; }
+        /* Rodapé com Hash de Grupo */
+        .card-footer { 
+            margin-top: 10px; 
+            padding-top: 5px;
+            border-top: 1px dashed #ccc;
+            font-size: 10px; 
+            color: #444; 
+            display: flex; 
+            justify-content: space-between;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
 
-        .grid-3 td { font-size: 2em; padding: 15px 2px; }
-        .grid-4 td { font-size: 1.5em; padding: 10px 2px; }
-        .grid-5 td { font-size: 1.1em; padding: 6px 2px; }
+        .free-cell { background-color: #f5f5f5; color: #e74c3c; font-size: 0.9em !important; }
+        .grid-3 td { font-size: 2.2em; padding: 15px 2px; }
+        .grid-4 td { font-size: 1.6em; padding: 10px 2px; }
+        .grid-5 td { font-size: 1.2em; padding: 6px 2px; }
 
         @media print {
             .setup-container, h1 { display: none; }
             body { background: white; padding: 0; margin: 0; }
             .page { box-shadow: none; margin: 0; border: none; }
-            .layout-2 { width: 100vw; height: 100vh; }
             @page { margin: 0; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Gerador de Bingo de Potenciação</h1>
+    <h1>Gerador de Bingo Pro</h1>
     
     <div class="setup-container">
         <div class="config-row">
@@ -93,55 +100,36 @@
                 <label>Qtd. Cartelas</label>
                 <input type="number" id="qtdCartelas" value="30">
             </div>
-            
             <div class="input-group">
-                <label>Tamanho da Grade</label>
+                <label>Grade</label>
                 <select id="gridSize" class="grid-select">
-                    <option value="3">3x3 (Padrão)</option>
+                    <option value="3">3x3</option>
                     <option value="4">4x4</option>
                     <option value="5">5x5</option>
                 </select>
             </div>
-
             <label class="free-option">
                 <input type="checkbox" id="useFree" checked>
-                <span>CENTRO LIVRE (FREE)</span>
+                <span>CENTRO LIVRE</span>
             </label>
         </div>
 
         <div class="config-row">
-            <div class="input-group">
-                <label>Base Mín.</label>
-                <input type="number" id="baseMin" class="math-input" value="1">
-            </div>
-            <div class="input-group">
-                <label>Base Máx.</label>
-                <input type="number" id="baseMax" class="math-input" value="6">
-            </div>
-            <div class="input-group">
-                <label>Exp. Mín.</label>
-                <input type="number" id="expMin" class="math-input" value="1">
-            </div>
-            <div class="input-group">
-                <label>Exp. Máx.</label>
-                <input type="number" id="expMax" class="math-input" value="6">
-            </div>
+            <div class="input-group"><label>Base Mín.</label><input type="number" id="baseMin" class="math-input" value="1"></div>
+            <div class="input-group"><label>Base Máx.</label><input type="number" id="baseMax" class="math-input" value="6"></div>
+            <div class="input-group"><label>Exp. Mín.</label><input type="number" id="expMin" class="math-input" value="1"></div>
+            <div class="input-group"><label>Exp. Máx.</label><input type="number" id="expMax" class="math-input" value="6"></div>
         </div>
 
         <div class="button-row">
-            <a href="https://profpablosanches.github.io/Sorteador/" class="btn sorteador-btn">🎮 Voltar ao Sorteador</a>
-            
-            <div class="input-group">
-                <label>Cartelas por Página</label>
-                <select id="layoutSorteio" class="layout-select">
-                    <option value="2">2 Cartelas (Paisagem)</option>
-                    <option value="4">4 Cartelas (Retrato)</option>
-                    <option value="6" selected>6 Cartelas (Retrato)</option>
-                </select>
-            </div>
-
-            <button class="btn shuffle-btn" onclick="gerarCartelas()">🔄 Gerar</button>
-            <button class="btn print-btn" onclick="window.print()">🖨️ Imprimir Tudo</button>
+            <a href="https://profpablosanches.github.io/Sorteador/" class="btn sorteador-btn">🎮 Sorteador</a>
+            <select id="layoutSorteio" class="layout-select">
+                <option value="2">2 Cartelas</option>
+                <option value="4">4 Cartelas</option>
+                <option value="6" selected>6 Cartelas</option>
+            </select>
+            <button class="btn shuffle-btn" onclick="gerarCartelas()">🔄 Gerar Novo Lote</button>
+            <button class="btn print-btn" onclick="window.print()">🖨️ Imprimir</button>
         </div>
     </div>
 
@@ -149,6 +137,15 @@
 
     <script>
         const container = document.getElementById('bingo-container');
+
+        // Gera um Hash único para o GRUPO baseado no tempo e configurações
+        async function gerarHashGrupo(semente) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(semente);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 10).toUpperCase();
+        }
 
         function shuffle(array) {
             let m = array.length, t, i;
@@ -159,35 +156,33 @@
             return array;
         }
 
-        function gerarCartelas() {
-            const bMin = parseInt(document.getElementById('baseMin').value);
-            const bMax = parseInt(document.getElementById('baseMax').value);
-            const eMin = parseInt(document.getElementById('expMin').value);
-            const eMax = parseInt(document.getElementById('expMax').value);
+        async function gerarCartelas() {
+            const bMin = document.getElementById('baseMin').value;
+            const bMax = document.getElementById('baseMax').value;
+            const eMin = document.getElementById('expMin').value;
+            const eMax = document.getElementById('expMax').value;
             const totalCartelas = parseInt(document.getElementById('qtdCartelas').value);
             const dimensao = parseInt(document.getElementById('gridSize').value);
             const useFree = document.getElementById('useFree').checked;
             const perPage = parseInt(document.getElementById('layoutSorteio').value);
             
-            const styleTag = document.getElementById('print-orientation') || document.createElement('style');
-            styleTag.id = 'print-orientation';
-            styleTag.innerHTML = `@media print { @page { size: ${perPage == 2 ? 'landscape' : 'portrait'}; } }`;
-            document.head.appendChild(styleTag);
-
-            const totalCasas = dimensao * dimensao;
-            const centroIndex = Math.floor(totalCasas / 2);
+            // Semente única para este clique (Data + Configs)
+            const sementeGrupo = Date.now() + bMin + bMax + eMin + eMax + totalCartelas;
+            const hashUnicoLote = await gerarHashGrupo(sementeGrupo.toString());
 
             let resultadosSet = new Set();
-            for (let b = bMin; b <= bMax; b++) {
-                for (let e = eMin; e <= eMax; e++) {
+            for (let b = parseInt(bMin); b <= parseInt(bMax); b++) {
+                for (let e = parseInt(eMin); e <= parseInt(eMax); e++) {
                     resultadosSet.add(Math.pow(b, e));
                 }
             }
             let listaResultados = Array.from(resultadosSet);
+            const totalCasas = dimensao * dimensao;
+            const centroIndex = Math.floor(totalCasas / 2);
             const qtdNecessaria = (useFree && dimensao % 2 !== 0) ? totalCasas - 1 : totalCasas;
             
             if (listaResultados.length < qtdNecessaria) {
-                alert(`Erro: Intervalo insuficiente.`);
+                alert(`Erro: O intervalo de potências gera apenas ${listaResultados.length} resultados únicos, mas a cartela precisa de ${qtdNecessaria}.`);
                 return;
             }
 
@@ -203,7 +198,9 @@
                     if (currentCard > totalCartelas) break;
 
                     let sorteados = shuffle([...listaResultados]).slice(0, qtdNecessaria);
-                    let cardHtml = `<div class="card grid-${dimensao}"><h4>BINGO DE POTÊNCIAS #${currentCard}</h4><table>`;
+                    let cardHtml = `<div class="card grid-${dimensao}">
+                        <h4>BINGO DE POTÊNCIAS</h4>
+                        <table>`;
                     
                     let numIndex = 0;
                     for (let l = 0; l < dimensao; l++) {
@@ -219,7 +216,12 @@
                         }
                         cardHtml += '</tr>';
                     }
-                    cardHtml += `</table></div>`;
+                    cardHtml += `</table>
+                        <div class="card-footer">
+                            <span>ID LOTE: ${hashUnicoLote}</span>
+                            <span>CARTELA: #${String(currentCard).padStart(3, '0')}</span>
+                        </div>
+                    </div>`;
                     pageDiv.innerHTML += cardHtml;
                     currentCard++;
                 }

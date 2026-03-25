@@ -2,15 +2,34 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Sorteador Bingo - Potência com Dados</title>
+    <title>Sorteador Bingo - Potência Customizada</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; height: 100vh; margin: 0; background: #121212; color: white; overflow: hidden; }
         
         /* Área Principal */
         .main { flex: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #444; padding: 20px; }
         h1 { color: #f1c40f; letter-spacing: 2px; margin-bottom: 5px; }
-        .sub { color: #888; margin-bottom: 30px; }
+        .sub { color: #888; margin-bottom: 20px; }
         
+        /* Painel de Configuração */
+        .config-panel {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+        .config-group { display: flex; flex-direction: column; gap: 5px; }
+        .config-group label { color: #f1c40f; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .config-inputs { display: flex; gap: 5px; }
+        .config-panel input { 
+            width: 50px; background: #2d2d2d; border: 1px solid #444; color: white; 
+            padding: 5px; border-radius: 4px; text-align: center; 
+        }
+
         /* Ajuste do Expoente */
         sup { 
             vertical-align: super; 
@@ -20,8 +39,7 @@
             top: -0.5em; 
         }
 
-        /* Fonte da Potência Principal */
-        .display-operacao { font-size: 140px; font-weight: bold; margin: 40px; color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.2); height: 180px; display: flex; align-items: center; }
+        .display-operacao { font-size: 140px; font-weight: bold; margin: 30px; color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.2); height: 180px; display: flex; align-items: center; }
         
         /* Lateral de Histórico */
         .sidebar { flex: 1; padding: 20px; overflow-y: auto; background: #1e1e1e; }
@@ -45,19 +63,15 @@
             border: none; border-radius: 50px; font-weight: bold; transition: 0.2s; box-shadow: 0 4px #d4ac0d; 
             text-decoration: none; display: inline-block; text-align: center;
         }
-        button:hover, .btn-link:hover { background: #d4ac0d; }
-        button:active, .btn-link:active { transform: translateY(2px); box-shadow: 0 2px #d4ac0d; }
+        button:hover { background: #d4ac0d; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px #d4ac0d; }
         button:disabled { background: #444; color: #888; box-shadow: none; cursor: not-allowed; }
         
         .secondary-btn { background: transparent; font-size: 14px; padding: 8px 15px; border-radius: 4px; margin-top: 5px; box-shadow: none; font-weight: normal; transition: 0.3s; cursor: pointer; }
-        
-        /* Cores dos botões secundários */
         .instr-btn { color: #3498db; border: 1px solid #3498db; }
         .instr-btn:hover { background: #3498db; color: white; }
-        
-        .gerador-btn { color: #2ecc71; border: 1px solid #2ecc71; font-weight: bold; }
+        .gerador-btn { color: #2ecc71; border: 1px solid #2ecc71; font-weight: bold; text-decoration: none; }
         .gerador-btn:hover { background: #2ecc71; color: white; }
-
         .reset { color: #e74c3c; border: 1px solid #e74c3c; }
         .reset:hover { background: #e74c3c; color: white; }
 
@@ -76,8 +90,6 @@
         }
         .modal-op { font-size: 100px; color: #bdc3c7; font-weight: bold; }
         .modal-res { font-size: 140px; color: #f1c40f; font-weight: bold; }
-        
-        .instr-text { text-align: left; line-height: 1.6; color: #ecf0f1; font-size: 18px; }
         .close-modal { margin-top: 20px; background: #95a5a6; font-size: 16px; padding: 10px 20px; color: white; border-radius: 5px; cursor: pointer; border: none; }
     </style>
 </head>
@@ -85,7 +97,25 @@
 
     <div class="main">
         <h1>BINGO: POTÊNCIAS</h1>
-        <p class="sub">Bases e Expoentes de 1 a 6</p>
+        <p class="sub">Configure o intervalo e sorteie as operações</p>
+
+        <div class="config-panel">
+            <div class="config-group">
+                <label>Bases</label>
+                <div class="config-inputs">
+                    <input type="number" id="base-min" value="1" title="Mínimo">
+                    <input type="number" id="base-max" value="6" title="Máximo">
+                </div>
+            </div>
+            <div class="config-group">
+                <label>Expoentes</label>
+                <div class="config-inputs">
+                    <input type="number" id="exp-min" value="1" title="Mínimo">
+                    <input type="number" id="exp-max" value="6" title="Máximo">
+                </div>
+            </div>
+        </div>
+        
         <div id="operacao-atual" class="display-operacao">?</div>
         
         <div class="controls">
@@ -96,7 +126,7 @@
                 <button class="secondary-btn instr-btn" onclick="abrirInstrucoes()">Instruções</button>
             </div>
             
-            <button class="secondary-btn reset" onclick="zerarSorteador()">Zerar Sorteador</button>
+            <button class="secondary-btn reset" onclick="zerarSorteador()">Reiniciar com novos valores</button>
         </div>
     </div>
 
@@ -117,40 +147,40 @@
     <div id="modal-instr" class="modal-overlay" onclick="fecharModal('modal-instr')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 style="color: #f1c40f;">Instruções do Jogo</h2>
-            <div class="instr-text" id="texto-instrucoes"></div>
+            <div class="instr-text" id="texto-instrucoes">
+                1. Defina o intervalo de Bases e Expoentes desejado.<br>
+                2. Clique em "Reiniciar" para carregar as novas possibilidades.<br>
+                3. Distribua as cartelas para os alunos.<br>
+                4. Clique em "PRÓXIMA OPERAÇÃO" para sortear.<br>
+                5. Os alunos marcam o resultado se houver na cartela.<br>
+                6. Clique no histórico para conferir o resultado de um sorteio passado.<br>
+              <br>
+              DICA: Defina os limites das bases de 1 a 6 e expoente de 1 a 6, possibilitando usar dois dados de 6 faces para os sorteios dos números.
+            </div>
             <button class="close-modal" onclick="fecharModal('modal-instr')">Entendido</button>
         </div>
     </div>
 
     <script>
-        const TEXTO_INSTRUCOES = `
-            SISTEMA DE SORTEIO DAS BASES E EXPOENTES:
-            <br><br>
-            Utilize dois dados de 6 faces.
-            <br>
-            O primeiro dado lançado resultará no valor da base.<br>
-            O segundo dado lançado resultará no valor do expoente.<br><br>
-            1. Distribua as cartelas para os alunos.<br>
-            2. Clique em "PRÓXIMA OPERAÇÃO" para sortear uma potência.<br>
-            3. Os alunos devem calcular mentalmente ou no papel o resultado.<br>
-            4. Se o resultado estiver na cartela, o aluno marca o número.<br>
-            5. Para conferir um resultado, clique na operação desejada no Histórico lateral.<br>
-            6. Ganha quem completar a cartela primeiro e gritar BINGO!
-        `;
-
         let operacoesPool = [];
 
         function inicializar() {
+            const bMin = parseInt(document.getElementById('base-min').value);
+            const bMax = parseInt(document.getElementById('base-max').value);
+            const eMin = parseInt(document.getElementById('exp-min').value);
+            const eMax = parseInt(document.getElementById('exp-max').value);
+
             operacoesPool = [];
-            for (let b = 1; b <= 6; b++) {
-                for (let e = 1; e <= 6; e++) {
+            
+            // Loop baseado nos valores dos inputs
+            for (let b = bMin; b <= bMax; b++) {
+                for (let e = eMin; e <= eMax; e++) {
                     operacoesPool.push({
                         html: b + '<sup>' + e + '</sup>',
                         resultado: Math.pow(b, e).toLocaleString('pt-BR')
                     });
                 }
             }
-            document.getElementById('texto-instrucoes').innerHTML = TEXTO_INSTRUCOES;
             embaralhar();
         }
 
@@ -191,7 +221,7 @@
         }
 
         function zerarSorteador() {
-            if (confirm("Deseja mesmo reiniciar o bingo?")) {
+            if (confirm("Deseja aplicar os novos limites e reiniciar o bingo?")) {
                 fecharModal('modal-res-container');
                 document.getElementById('historico').innerHTML = "";
                 document.getElementById('operacao-atual').innerHTML = "?";
@@ -201,6 +231,7 @@
             }
         }
 
+        // Inicia o jogo na primeira carga
         inicializar();
     </script>
 </body>
